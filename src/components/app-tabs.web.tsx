@@ -64,7 +64,7 @@ export function CustomTabList(props: TabListProps) {
     const scheme = useColorScheme();
     const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
 
-    console.log(props)
+    // console.log(props)
 
     return (
         <View {...props} style={styles.tabListContainer}>

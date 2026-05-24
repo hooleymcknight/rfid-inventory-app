@@ -1,181 +1,97 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import React from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from 'react';
+import { BackHandler, StyleSheet } from 'react-native';
 
-import { ExternalLink } from '@/components/external-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { ScreenContainer } from '@/components/screen-container';
+import { LocationAccordion } from '@/components/location-accordion';
+import { BinDetail } from '@/components/bin-detail';
+import { Spacing } from '@/constants/theme';
+import { useInventory } from '@/store/inventory';
+import type { LocationObj, ContainerObj } from '@/constants/db-interface';
 
-export default function TabThreeScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
+// drop this somewhere temporary, like at the top of BrowseScreen
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { useEffect } from 'react';
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
 
-  return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
+export default function BrowseScreen() {
+    const [openLocationId, setOpenLocationId] = useState<number | null>(null);
+    const [selectedStorageId, setSelectedStorageId] = useState<number | null>(null);
+    const { data, isLoading, isError } = useInventory();
+
+    // Android back button: pop out of detail view first, then exit screen.
+    // useEffect(() => {
+    //     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+    //         if (selectedStorageId !== null) {
+    //             setSelectedStorageId(null);
+    //             return true;
+    //         }
+    //         return false;
+    //     });
+    //     return () => sub.remove();
+    // }, [selectedStorageId]);
+
+    useEffect(() => {
+        AsyncStorage.clear().then(() => console.log('cache cleared'));
+    }, []);
+
+    if (isLoading) return <ThemedText>Loading…</ThemedText>;
+    if (isError || !data) return <ThemedText>Error. Please close and reopen the app.</ThemedText>;
+
+    // Detail view — items inside the tapped bin.
+    if (selectedStorageId !== null) {
+        const container = data.containers.find((c: any) => c.storage_id === selectedStorageId);
+        console.log(data.items)
+        const items = data.items.filter((i: any) => i.storage_id === selectedStorageId);
+        console.log('container:', container);
+        console.log('items', items);
+        return (
+            <ScreenContainer>
+                <BinDetail
+                    container={container}
+                    items={items}
+                    onBack={() => setSelectedStorageId(null)}
                 />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
+            </ScreenContainer>
+        );
+    }
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
+    // List view — locations with accordion of bins.
+    return (
+        <ScreenContainer>
+            <ThemedView style={styles.titleContainer}>
+                <ThemedText type="subtitle">Browse</ThemedText>
+                <ThemedText style={styles.centerText} themeColor="textSecondary">
+                    Click a location below to explore containers and inventory there.
+                </ThemedText>
             </ThemedView>
-          </Collapsible>
 
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
-  );
+            <ThemedView>
+                {data.locations.map((loc: LocationObj) => (
+                    <LocationAccordion
+                        key={loc.location_id}
+                        loc={loc}
+                        containers={data.containers.filter(
+                            (c: ContainerObj) => c.location_id === loc.location_id
+                        )}
+                        onStoragePress={setSelectedStorageId}
+                    />
+                ))}
+            </ThemedView>
+        </ScreenContainer>
+    );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-  },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
-  },
+    titleContainer: {
+        gap: Spacing.three,
+        alignItems: 'center',
+        paddingHorizontal: Spacing.four,
+        paddingVertical: Spacing.six,
+    },
+    centerText: {
+        textAlign: 'center',
+    },
 });

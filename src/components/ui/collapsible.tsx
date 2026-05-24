@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
+    marginBottom: 20,
   },
   pressedHeading: {
     opacity: 0.7,
@@ -57,9 +58,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    marginTop: Spacing.three,
+    marginTop: Spacing.one,
     borderRadius: Spacing.three,
     marginLeft: Spacing.four,
     padding: Spacing.four,
+    marginBottom: Spacing.four,
   },
 });

@@ -14,7 +14,7 @@ import { useTheme } from '@/hooks/use-theme';
 // import { ScanInput } from '@/components/scan-input';
 import { TextInput } from 'react-native';
 
-console.log('scan.web loaded')
+// console.log('scan.web loaded')
 
 const receiveCode = (e: KeyboardEvent) => {
     const input = document.querySelector('input')
@@ -69,7 +69,7 @@ export default function TabTwoScreen() {
                         placeholder="Input code here"
                         submitBehavior="submit"
                         onSubmitEditing={(e) => {
-                            console.log(e.nativeEvent.text)
+                            // console.log(e.nativeEvent.text)
                             // pull from database, give info.
                             // clear input.
                         }}

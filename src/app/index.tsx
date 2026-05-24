@@ -1,14 +1,25 @@
 import * as Device from 'expo-device';
+import { useEffect } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { ScanInput } from '@/components/scan-input';
+// import { ScanInput } from '@/components/scan-input';
+
+// import { useInventory } from '../store/inventory';
+
+// interface storeData {
+//     locations: Array<String>;
+//     containers: Array<String>;
+//     items: Array<String>;
+//     loading: Boolean;
+//     error: String;
+//     sync: Function;
+// }
 
 function getDevMenuHint() {
     if (Platform.OS === 'web') {
@@ -30,6 +41,12 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+    // const { locations, containers, items, loading, error, sync } = useInventory() as storeData;
+
+    useEffect(() => {
+        // sync();
+    }, []);
+
     return (
         <ThemedView style={styles.container}>
             <SafeAreaView style={styles.safeArea}>
@@ -39,6 +56,18 @@ export default function HomeScreen() {
                         RFID Inventory System
                     </ThemedText>
                 </ThemedView>
+
+                {/* <ThemedView>
+                    {loading && <ThemedText>loading...</ThemedText>}
+                    {error && <ThemedText>error: {error}</ThemedText>}
+                    {!loading && !error && (
+                        <>
+                            <ThemedText>Locations: {locations.length}</ThemedText>
+                            <ThemedText>Containers: {containers.length}</ThemedText>
+                            <ThemedText>Items: {items.length}</ThemedText>
+                        </>
+                    )}
+                </ThemedView> */}
 
                 {/* <ThemedText type="code" style={styles.code}>
                     Scan a tag

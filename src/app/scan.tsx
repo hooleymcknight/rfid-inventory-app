@@ -67,7 +67,7 @@ export default function TabTwoScreen() {
                         placeholder="Input code here"
                         submitBehavior="submit"
                         onSubmitEditing={(e: TextInputSubmitEditingEvent) => {
-                            console.log(e)
+                            // console.log(e)
                         }}
                     />
                 </ThemedView>
