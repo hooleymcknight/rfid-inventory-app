@@ -13,30 +13,30 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
   const theme = useTheme();
 
   return (
-    <ThemedView>
-      <Pressable
-        style={({ pressed }) => [styles.heading, pressed && styles.pressedHeading]}
-        onPress={() => setIsOpen((value) => !value)}>
-        <ThemedView type="backgroundElement" style={styles.button}>
-          <SymbolView
-            name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
-            size={14}
-            weight="bold"
-            tintColor={theme.text}
-            style={{ transform: [{ rotate: isOpen ? '-90deg' : '90deg' }] }}
-          />
-        </ThemedView>
+        <ThemedView style={{ backgroundColor: 'rgb(240, 240, 243)', borderRadius: 32, marginVertical: 10 }}>
+            <Pressable
+                style={({ pressed }) => [styles.heading, pressed && styles.pressedHeading]}
+                onPress={() => setIsOpen((value) => !value)}
+            >
+                <ThemedView type="backgroundElement" style={[styles.button, { transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }]}>
+                    <SymbolView
+                        name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
+                        size={14}
+                        weight="bold"
+                        tintColor={theme.text}
+                    />
+                </ThemedView>
 
-        <ThemedText type="small">{title}</ThemedText>
-      </Pressable>
-      {isOpen && (
-        <Animated.View entering={FadeIn.duration(200)}>
-          <ThemedView type="backgroundElement" style={styles.content}>
-            {children}
-          </ThemedView>
-        </Animated.View>
-      )}
-    </ThemedView>
+                <ThemedText type="small">{title}</ThemedText>
+            </Pressable>
+            {isOpen && (
+                <Animated.View entering={FadeIn.duration(200)}>
+                    <ThemedView type="backgroundElement" style={styles.content}>
+                        {children}
+                    </ThemedView>
+                </Animated.View>
+            )}
+        </ThemedView>
   );
 }
 
@@ -45,7 +45,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
-    marginBottom: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   pressedHeading: {
     opacity: 0.7,
@@ -56,6 +57,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgb(224, 225, 230)',
   },
   content: {
     marginTop: Spacing.one,

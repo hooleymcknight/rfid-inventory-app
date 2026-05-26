@@ -24,6 +24,11 @@ const queryClient = new QueryClient({
 const persister = createAsyncStoragePersister({ storage: AsyncStorage });
 
 export default function TabLayout() {
+    // DEV ONLY — wipes persisted cache on every mount so schema/shape
+    // changes don't surface as stale data while iterating.
+    // Remove (and bump the `buster` string instead) before shipping.
+    // AsyncStorage.clear().then(() => console.log('cache cleared'));
+
     const colorScheme = useColorScheme();
     return (
         <PersistQueryClientProvider

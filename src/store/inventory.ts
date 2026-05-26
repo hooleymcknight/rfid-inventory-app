@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { LocationObj, ContainerObj, ItemObj } from '@/constants/db-interface';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { LocationObj, ContainerObj, ItemObj, DigitsCountObj, CategoriesObj, ItemSubmission, FullDataObj } from '@/constants/db-interface';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_BASE as string;
 
@@ -14,8 +14,8 @@ export type InventorySync = {
     locations: LocationObj[];
     containers: ContainerObj[];
     items: ItemObj[];
-    categories: unknown[];   // type these properly once you use them
-    digitCounts: unknown[];
+    categories: CategoriesObj[];   // type these properly once you use them
+    digitCounts: DigitsCountObj[];
 };
 
 async function fetchInventory(): Promise<InventorySync> {
@@ -25,8 +25,33 @@ async function fetchInventory(): Promise<InventorySync> {
 }
 
 export const useInventory = () => {
-    return useQuery({
+    return useQuery<FullDataObj>({
         queryKey: inventoryKeys.list(),
         queryFn: fetchInventory,
+    });
+}
+
+/** add stuff */
+
+export type InventoryPush = {
+    data: ItemSubmission;
+}
+
+export const useAddToInventory = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (itemData: ItemSubmission) => {
+            const res = await fetch(API_BASE + '/api/inventory/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(itemData)
+            });
+            if (!res.ok) throw new Error (`HTTP ${res.status}`);
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: inventoryKeys.list() })
+        }
     });
 }

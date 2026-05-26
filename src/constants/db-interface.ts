@@ -1,3 +1,13 @@
+// ---------------
+
+export interface FullDataObj {
+    locations: Array<LocationObj>;
+    categories: Array<CategoriesObj>;
+    containers: Array<ContainerObj>;
+    items: Array<ItemObj>;
+    digitCounts: Array<DigitsCountObj>;
+}
+
 export interface LocationObj {
   location_id: number;
   location_name: string;
@@ -12,6 +22,29 @@ export interface ContainerObj {
 
 export interface ItemObj {
     item_id: number;
+    item: string;
+    description: string | null;
+    storage_id: number;
+}
+
+export interface DigitsCountObj {
+    sort_order: number;
+    database_name: string;
+    digit_count: number;
+}
+
+export interface CategoriesObj {
+    category_id: number;
+    category: string;
+}
+
+export interface MappedId {
+    db: string;
+    field: string;
+    value: string;
+}
+
+export interface ItemSubmission {
     item: string;
     description: string | null;
     storage_id: number;
