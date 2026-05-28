@@ -50,7 +50,7 @@ export default function BrowseScreen() {
                 <BinDetail
                     container={container}
                     items={items}
-                    onBack={() => setSelectedStorageId(null)}
+                    onBack={() => {setSelectedStorageId(null)}}
                 />
             </ScreenContainer>
         );

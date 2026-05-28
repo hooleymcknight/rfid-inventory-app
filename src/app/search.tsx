@@ -35,7 +35,7 @@ export default function SearchScreen() {
         setSearchString(val);
     }
 
-    if (isLoading) return <ScreenContainer><ThemedText>Loading…</ThemedText></ScreenContainer>;
+    if (isLoading) return <ScreenContainer><ThemedText>Loading… {data}</ThemedText></ScreenContainer>;
     if (isError || !data) return <ScreenContainer><ThemedText>Error. Please close and reopen the app.</ThemedText></ScreenContainer>;
 
     const fuse = useMemo(
