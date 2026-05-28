@@ -11,14 +11,14 @@ import { useTheme } from '@/hooks/use-theme';
 export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
-
+ 
   return (
-        <ThemedView style={{ backgroundColor: 'rgb(240, 240, 243)', borderRadius: 32, marginVertical: 10 }}>
+        <ThemedView type="backgroundElement" style={{ borderRadius: 32, marginVertical: 10 }}>
             <Pressable
                 style={({ pressed }) => [styles.heading, pressed && styles.pressedHeading]}
                 onPress={() => setIsOpen((value) => !value)}
             >
-                <ThemedView type="backgroundElement" style={[styles.button, { transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }]}>
+                <ThemedView type="backgroundSelected" style={[styles.button, { transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }]}>
                     <SymbolView
                         name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
                         size={14}
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgb(224, 225, 230)',
+    // backgroundColor: 'rgb(224, 225, 230)',
   },
   content: {
     marginTop: Spacing.one,
