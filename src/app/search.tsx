@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, View, TextInput } from 'react-native';
+import { StyleSheet, View, TextInput, Platform } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import Fuse from 'fuse.js';
 
@@ -66,6 +66,7 @@ export default function SearchScreen() {
             <ThemedView>
                 <View style={styles.inputBtnContainer}>
                     <TextInput
+                        id="search-input"
                         style={styles.input}
                         placeholderTextColor='rgba(0, 0, 0, 0.6)'
                         placeholder="Search for an item"
@@ -120,22 +121,25 @@ const styles = StyleSheet.create({
         padding: 8,
         borderRadius: 4,
         width: 'auto',
-        marginHorizontal: 'auto',
+        marginHorizontal: Platform.OS === 'web' ? 'auto' : 0,
         marginTop: 0,
         minWidth: 300,
         borderWidth: 1,
         borderColor: 'rgba(0, 0, 0, 0.4)',
         color: '#000',
         height: 40,
+        flexShrink: 1,
     },
     inputBtnContainer: {
         display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
+        flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         gap: 16,
         width: 'auto',
         marginHorizontal: 'auto',
         marginBottom: 24,
+        maxWidth: '95%',
+        flexWrap: 'wrap',
     },
 });

@@ -13,6 +13,7 @@ export const Colors = {
     background: '#ffffff',
     backgroundElement: '#F0F0F3',
     backgroundSelected: '#E0E1E6',
+    tabSelected: '#666',
     textSecondary: '#60646C',
   },
   dark: {
@@ -20,6 +21,7 @@ export const Colors = {
     background: '#222',
     backgroundElement: '#2E3135',
     backgroundSelected: '#111',
+    tabSelected: '#AAA',
     textSecondary: '#B0B4BA',
   },
 } as const;

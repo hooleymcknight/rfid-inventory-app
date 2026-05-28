@@ -71,7 +71,7 @@ export default function BrowseScreen() {
                 </ThemedText>
             </ThemedView>
 
-            <ThemedView>
+            <ThemedView style={{ paddingHorizontal: '2.5%' }}>
                 {sortUnfixed(data?.locations).map((loc) => (
                     <LocationAccordion
                         key={loc.location_id}

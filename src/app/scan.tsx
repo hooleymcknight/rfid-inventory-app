@@ -95,6 +95,7 @@ export default function ScanScreen() {
             <ThemedView>
                 <View style={styles.inputBtnContainer}>
                     <TextInput
+                        id="scan-input"
                         ref={inputRef}
                         style={styles.input}
                         placeholderTextColor="rgba(0, 0, 0, 0.6)"
@@ -134,22 +135,25 @@ const styles = StyleSheet.create({
         padding: 8,
         borderRadius: 4,
         width: 'auto',
-        marginHorizontal: 'auto',
+        marginHorizontal: Platform.OS === 'web' ? 'auto' : 0,
         marginTop: 0,
         minWidth: 300,
         borderWidth: 1,
         borderColor: 'rgba(0, 0, 0, 0.4)',
         color: '#000',
         height: 40,
+        flexShrink: 1
     },
     inputBtnContainer: {
         display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
+        flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         gap: 16,
         width: 'auto',
         marginHorizontal: 'auto',
         marginBottom: 24,
+        maxWidth: '95%',
+        flexWrap: 'wrap',
     },
 });
