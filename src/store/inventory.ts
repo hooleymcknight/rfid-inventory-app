@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LocationObj, ContainerObj, ItemObj, DigitsCountObj, CategoriesObj, ItemSubmission, FullDataObj } from '@/constants/db-interface';
 
-const API_BASE = process.env.EXPO_PUBLIC_API_BASE as string;
+const API_BASE = "https://hollyngrade.com/rfid";
 
 export const inventoryKeys = {
     all: ['inventory'] as const,
