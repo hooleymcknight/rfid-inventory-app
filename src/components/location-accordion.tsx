@@ -20,7 +20,7 @@ export const LocationAccordion = ({
             <ButtonSet>
                 {containers.map(con => (
                     <BasicButton key={con.storage_id}
-                        submitHandler={() => { onStoragePress(con.location_id, con.category_id, con.storage_id)}}
+                        submitHandler={() => { onStoragePress(con.location_id, con.category_id, con.storage_id) }}
                         text={capitalizeWords(con.container)} canSubmit={true}
                         customTextStyles={{ fontSize: 20, lineHeight: 24, margin: 0, paddingVertical: 2 }}
                     />

@@ -27,7 +27,7 @@ export default function BasicButton({ text, submitHandler, canSubmit = true, cus
             disabled={!canSubmit}
             onPress={submitHandler}
         >
-            <Text style={[styles.btnText, customTextStyles]}>{text}</Text>
+            <Text style={[styles.btnText, customTextStyles, text.match(/→|&#8594;/g)?.length ? styles.arrowBtn : {}]}>{text}</Text>
         </Pressable>
     );
 }
@@ -44,10 +44,10 @@ const styles = StyleSheet.create({
     },
     btnText: {
         fontSize: 32,
-        marginBottom: 5,
         color: '#fff',
         maxHeight: 40,
-        marginTop: -6
+        includeFontPadding: false,
+        textAlignVertical: 'center',
     },
     btn: {
         backgroundColor: '#2932b7',
@@ -67,5 +67,9 @@ const styles = StyleSheet.create({
     btnDisabled: {
         backgroundColor: 'grey',
         cursor: 'not-allowed',
+    },
+    arrowBtn: {
+        marginBottom: 5,
+        marginTop: -6,
     }
 });
