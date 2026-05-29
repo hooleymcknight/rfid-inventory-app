@@ -29,7 +29,7 @@ export function BinDetail({ container, items, onBack }: Props) {
 
             <ThemedView>
                 {items.length === 0 ? (
-                    <ThemedText themeColor="textSecondary">
+                    <ThemedText themeColor="textSecondary" style={styles.centerText}>
                         There are no items in this container.
                     </ThemedText>
                 ) : (
@@ -66,6 +66,9 @@ const styles = StyleSheet.create({
     header: {
         paddingVertical: Spacing.four,
         alignItems: 'center',
+    },
+    centerText: {
+        textAlign: 'center',
     },
     itemRow: {
         paddingVertical: Spacing.two,
