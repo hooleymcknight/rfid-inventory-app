@@ -201,7 +201,8 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: '#fafafa',
-        padding: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 14,
         borderRadius: 4,
         width: 'auto',
         // marginHorizontal: 'auto',
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
         minWidth: 300,
         borderWidth: 1,
         borderColor: 'rgba(0, 0, 0, 0.4)',
-        height: 40,
+        // height: 40,
         color: 'black',
     },
     inputBtnContainer: {

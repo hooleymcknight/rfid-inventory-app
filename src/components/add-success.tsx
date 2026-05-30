@@ -20,7 +20,7 @@ type Props = {
 
 const btnStyles = {
     fontSize: 20,
-    lineHeight: 24,
+    // lineHeight: 24,
     margin: 0
 }
 

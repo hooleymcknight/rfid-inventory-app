@@ -1,9 +1,9 @@
-import { Button, StyleSheet, Pressable, PressableStateCallbackType, Text } from 'react-native';
+import { StyleSheet, Pressable, PressableStateCallbackType, Text } from 'react-native';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 import { Spacing } from '@/constants/theme';
 import type { ContainerObj, ItemObj } from '@/constants/db-interface';
-import { toRFID, capitalizeWords } from '@/constants/helpers';
+import { toRFID, capitalizeWords, padInput } from '@/constants/helpers';
 
 type Props = {
     container: ContainerObj | undefined;
@@ -35,7 +35,7 @@ export function BinDetail({ container, items, onBack }: Props) {
                 ) : (
                     <ThemedView>
                         {items.map(item => (
-                            <ThemedView key={item.item_id} style={styles.itemRow}>
+                            <ThemedView key={item.item_id} id={String(padInput(item.item_id, 3))} style={styles.itemRow}>
                                 <ThemedText>{item.item}</ThemedText>
                                 {item.description ? (
                                     <ThemedText type="small" themeColor="textSecondary">
@@ -72,21 +72,22 @@ const styles = StyleSheet.create({
     },
     itemRow: {
         paddingVertical: Spacing.two,
+        marginBottom: Spacing.two,
     },
     btnText: {
         fontSize: 18,
         marginBottom: 5,
         color: '#fff',
-        maxHeight: 40,
+        // maxHeight: 40,
         marginTop: 5
     },
     btn: {
         backgroundColor: '#2932b7',
         borderRadius: 4,
-        paddingVertical: 2,
+        paddingVertical: 12,
         paddingHorizontal: 24,
         width: 'auto',
-        maxHeight: 40,
+        // maxHeight: 40,
         overflow: 'hidden',
         alignSelf: 'center',
     },

@@ -132,7 +132,8 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: '#fafafa',
-        padding: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 14,
         borderRadius: 4,
         width: 'auto',
         marginHorizontal: Platform.OS === 'web' ? 'auto' : 0,
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(0, 0, 0, 0.4)',
         color: '#000',
-        height: 40,
+        // height: 40,
         flexShrink: 1
     },
     inputBtnContainer: {

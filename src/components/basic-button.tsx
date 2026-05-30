@@ -45,17 +45,18 @@ const styles = StyleSheet.create({
     btnText: {
         fontSize: 32,
         color: '#fff',
-        maxHeight: 40,
+        // maxHeight: 40,
         includeFontPadding: false,
         textAlignVertical: 'center',
+        backgroundColor: '#a200004a',
     },
     btn: {
         backgroundColor: '#2932b7',
         borderRadius: 4,
-        paddingVertical: 2,
+        paddingVertical: 12,
         paddingHorizontal: 12,
         width: 'auto',
-        maxHeight: 40,
+        // maxHeight: 40,
         overflow: 'hidden',
     },
     btnHovered: {
