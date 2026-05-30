@@ -46,7 +46,7 @@ export default function BrowseScreen() {
         const items = data.items.filter((i) => i.storage_id === selectedStorageId);
 
         return (
-            <ScreenContainer>
+            <ScreenContainer style={{ paddingHorizontal: 8 }}>
                 <BinDetail
                     container={container}
                     items={items}
