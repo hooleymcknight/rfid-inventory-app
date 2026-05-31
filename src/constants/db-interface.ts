@@ -49,3 +49,5 @@ export interface ItemSubmission {
     description: string | null;
     storage_id: number;
 }
+
+export type slSchema = { location_id: number; location_name: string; containers: ContainerObj[]; };

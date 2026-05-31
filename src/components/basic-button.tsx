@@ -23,6 +23,8 @@ export default function BasicButton({ text, submitHandler, canSubmit = true, cus
                 hovered && styles.btnHovered,
                 pressed && styles.btnPressed,
                 !canSubmit && styles.btnDisabled,
+                text.toLowerCase() === 'delete' ? { backgroundColor: '#a20000'} : null,
+                text.toLowerCase() === 'delete' && hovered ? { backgroundColor: '#a64c4c'} : null
             ]}
             disabled={!canSubmit}
             onPress={submitHandler}
@@ -43,17 +45,17 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     btnText: {
-        fontSize: 32,
+        fontSize: 20,
         color: '#fff',
         // maxHeight: 40,
         includeFontPadding: false,
         textAlignVertical: 'center',
-        backgroundColor: '#a200004a',
+        // backgroundColor: '#a200004a',
     },
     btn: {
         backgroundColor: '#2932b7',
         borderRadius: 4,
-        paddingVertical: 12,
+        paddingVertical: 8,
         paddingHorizontal: 12,
         width: 'auto',
         // maxHeight: 40,

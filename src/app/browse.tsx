@@ -45,11 +45,22 @@ export default function BrowseScreen() {
         const container = data.containers.find((c) => c.storage_id === selectedStorageId);
         const items = data.items.filter((i) => i.storage_id === selectedStorageId);
 
+        const storageLocationsArr = [];
+        for (const loc of data.locations) {
+            const theseContainers = data.containers.filter(c => c.location_id === loc.location_id) // data.containers[0].location_id
+            storageLocationsArr.push({
+                location_id: loc.location_id,
+                location_name: loc.location_name,
+                containers: theseContainers, // containerObj[]
+            });
+        }
+
         return (
             <ScreenContainer style={{ paddingHorizontal: 8 }}>
                 <BinDetail
                     container={container}
                     items={items}
+                    storageLocations={storageLocationsArr}
                     onBack={() => {setSelectedStorageId(null)}}
                 />
             </ScreenContainer>

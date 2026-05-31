@@ -1,17 +1,85 @@
-import { StyleSheet, Pressable, PressableStateCallbackType, Text } from 'react-native';
+import { StyleSheet, Pressable, PressableStateCallbackType, Text, Image } from 'react-native';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 import { Spacing } from '@/constants/theme';
-import type { ContainerObj, ItemObj } from '@/constants/db-interface';
+import type { ContainerObj, ItemObj, slSchema } from '@/constants/db-interface';
 import { toRFID, capitalizeWords, padInput } from '@/constants/helpers';
+import { useState, useEffect } from 'react';
+import { ItemValueRow } from './item-value-row';
+import { StorageLocationSelect } from './storage-location-select';
+import BasicButton from './basic-button';
 
 type Props = {
     container: ContainerObj | undefined;
     items: ItemObj[];
+    storageLocations: { location_id: number; location_name: string; containers: ContainerObj[]; }[];
     onBack: () => void;
 };
 
-export function BinDetail({ container, items, onBack }: Props) {
+const getLocFromContainer = (sl: slSchema[], contVal: any) => {
+    return sl.find(l => l.containers.map(c => c.storage_id).includes(Number(contVal)));
+}
+
+export function BinDetail({ container, items, storageLocations, onBack }: Props) {
+    const [isEditing, setIsEditing] = useState<boolean | number>(false);
+    const [activeItem, setActiveItem] = useState<ItemObj | null>(items.find(i => i.item_id == isEditing) ?? null)
+
+    const [storageContainerVal, setStorageContainerVal] = useState<string>(activeItem?.storage_id?.toString() ?? '');
+    const [activeLocation, setActiveLocation] = useState<slSchema | null>(getLocFromContainer(storageLocations, storageContainerVal) ?? null);
+
+    // useEffect(() => {
+    //     console.log('effect. change:', isEditing)
+    //     setActiveItem(items.find(i => i.item_id == isEditing) ?? null);
+    //     setStorageContainerVal(activeItem?.storage_id?.toString() ?? '');
+    //     setActiveLocation(getLocFromContainer(storageLocations, storageContainerVal) ?? null);
+    // }, [isEditing]);
+
+    if (isEditing) {
+        if (!activeItem) {
+            setIsEditing(false);
+            return;
+        }
+
+        const activeLocContainers = storageLocations.find(l => l.location_id === Number(activeLocation?.location_id))?.containers;
+
+        const submitHandler = () => {
+            // try to just log all the values you can find from right here.
+        }
+
+        const moveItemHandler = (container: string, location: string | null) => {
+            console.log(container) // handle this first, it will always change 
+            setStorageContainerVal(container); // this should come in as a string of the ID
+
+            if (!location) return;
+            const newActiveLoc = storageLocations.find(sl => sl.location_id === Number(location));
+            if (newActiveLoc) {
+                setActiveLocation(newActiveLoc);
+                setStorageContainerVal(String(newActiveLoc.containers[0].storage_id));
+            }
+        }
+
+        return (
+            <ThemedView style={styles.header}>
+                <ThemedText type="subtitle" style={{ marginBottom: 40 }}>
+                    {activeItem.item}
+                </ThemedText>
+                <ItemValueRow label="ID" incomingValue={activeItem.item_id} />
+                <ItemValueRow label="Name" incomingValue={activeItem.item} />
+                {/* <ItemValueRow label="Storage container" incomingValue={activeItem.storage_id} /> */}
+                <ItemValueRow label="Description" incomingValue={activeItem.description} multiline={true} />
+                <StorageLocationSelect storageContainerVal={storageContainerVal} activeLocation={activeLocation}
+                    storageLocations={storageLocations}
+                    pushContainerUpdate={(containerId, locationId = null) => { console.log(containerId); console.log(locationId)}}
+                />
+
+                <ThemedView style={styles.editButtons}>
+                    <BasicButton text="Delete" submitHandler={() => {}} />
+                    <BasicButton text="Submit" submitHandler={() => {submitHandler}} />
+                </ThemedView>
+            </ThemedView>
+        )
+    }
+
     return (
         <>
             <ThemedView style={styles.header}>
@@ -29,19 +97,28 @@ export function BinDetail({ container, items, onBack }: Props) {
 
             <ThemedView>
                 {items.length === 0 ? (
-                    <ThemedText themeColor="textSecondary" style={styles.centerText}>
+                    <ThemedText themeColor="textSecondary" style={[styles.centerText, { marginBottom: 5 }]}>
                         There are no items in this container.
                     </ThemedText>
                 ) : (
                     <ThemedView>
                         {items.map(item => (
                             <ThemedView key={item.item_id} id={String(padInput(item.item_id, 3))} style={styles.itemRow}>
-                                <ThemedText>{item.item}</ThemedText>
-                                {item.description ? (
-                                    <ThemedText type="small" themeColor="textSecondary">
-                                        {item.description}
-                                    </ThemedText>
-                                ) : null}
+                                <Pressable onPress={() => { console.log('prev:', isEditing, 'set is editing:', item.item_id); setIsEditing(item.item_id);}} style={{ padding: 6 }}>
+                                    <Image
+                                        source={require('@/assets/images/edit.png')}
+                                        width={60} height={60} alt="edit icon"
+                                        style={styles.editIcon}
+                                    />
+                                </Pressable>
+                                <ThemedView>
+                                    <ThemedText>{item.item}</ThemedText>
+                                    {item.description ? (
+                                        <ThemedText type="small" themeColor="textSecondary">
+                                            {item.description}
+                                        </ThemedText>
+                                    ) : null}
+                                </ThemedView>
                             </ThemedView>
                         ))}
                     </ThemedView>
@@ -72,7 +149,11 @@ const styles = StyleSheet.create({
     },
     itemRow: {
         paddingVertical: Spacing.two,
+        paddingHorizontal: Spacing.four,
         marginBottom: Spacing.two,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 20
     },
     btnText: {
         fontSize: 18,
@@ -97,4 +178,16 @@ const styles = StyleSheet.create({
     btnPressed: {
         backgroundColor: '#565cb3'
     },
+    editIcon: {
+        width: 20,
+        height: 20,
+    },
+    editButtons: {
+        marginTop: 20,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '90%',
+        alignItems: 'center',
+    }
 });
