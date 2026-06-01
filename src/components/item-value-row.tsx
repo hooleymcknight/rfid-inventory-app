@@ -6,20 +6,22 @@ import { useState, useEffect } from 'react';
 type Props = {
     label: string;
     incomingValue: string | number | null;
+    onUpdate: (val: string | number | null) => void;
     multiline?: boolean;
 };
 
-export function ItemValueRow({ label, incomingValue, multiline = false }: Props) {
+export function ItemValueRow({ label, incomingValue, onUpdate, multiline = false }: Props) {
     const [value, setValue] = useState<string>(incomingValue?.toString() ?? '');
-
-    // const changeHandler = (val: string) => {
-    //     console.log(val);
-    //     setValue(val);
-    // }
 
     useEffect(() => {
         setValue(incomingValue?.toString() ?? '');
     }, [incomingValue]);
+
+    const inputChangeHandler = (val: string | number | null) => {
+        const inputValue = String(val) ?? '';
+        onUpdate(inputValue);
+        setValue(inputValue);
+    }
 
     return (
         <ThemedView style={styles.inputRow}>
@@ -29,7 +31,7 @@ export function ItemValueRow({ label, incomingValue, multiline = false }: Props)
             <TextInput
                 style={styles.textInput}
                 value={value}
-                onChangeText={setValue}
+                onChangeText={(val) => {label !== 'ID' && inputChangeHandler(val)}}
                 multiline={multiline}
                 numberOfLines={multiline ? 3 : 1}
             />
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     },
     textInput: {
         flexGrow: 1,
-        textAlign: 'right',
+        // textAlign: 'right',
         backgroundColor: '#fafafa',
         paddingHorizontal: 8,
         paddingVertical: 8,

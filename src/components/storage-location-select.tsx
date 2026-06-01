@@ -9,14 +9,13 @@ import { capitalizeWords } from "@/constants/helpers";
 type slSchema = { location_id: number; location_name: string; containers: ContainerObj[]; };
 
 type Props = {
-    // incomingValue: string | number | null;
-    storageContainerVal: string;
-    activeLocation: slSchema | null;
-    storageLocations: slSchema[];
+    storageContainerId: string;
+    activeLocationObj: slSchema | null;
+    storageLocationsArr: slSchema[];
     pushContainerUpdate: (container: string, location?: string | null) => void;
 };
 
-const example = [
+const slExample = [
     { location_id: 200, location_name: 'front room', containers: [] },
     { location_id: 300, location_name: 'garage', containers: [] }
 ]
@@ -25,34 +24,7 @@ const getLocFromContainer = (sl: slSchema[], contVal: any) => {
     return sl.find(l => l.containers.map(c => c.storage_id).includes(Number(contVal)));
 }
 
-// export function StorageLocationSelect({ incomingValue, storageLocations }: Props) {
-//     const [value, setValue] = useState<string>(incomingValue?.toString() ?? '');
-//     const [activeLocation, setActiveLocation] = useState<LocationObj>()
-
-//     const activeLocContainers = storageLocations.find(l => l.id === Number(activeLocation?.location_id))?.containers;
-
-// export function StorageLocationSelect({ incomingValue, storageLocations }: Props) {
-export function StorageLocationSelect({ storageContainerVal, activeLocation, storageLocations, pushContainerUpdate }: Props) {
-    // const [storageContainerVal, setStorageContainerVal] = useState<string>(incomingValue?.toString() ?? '');
-    // const [activeLocation, setActiveLocation] = useState<slSchema | null>(getLocFromContainer(storageLocations, storageContainerVal) ?? null);
-
-    const activeLocContainers = storageLocations.find(l => l.location_id === Number(activeLocation?.location_id))?.containers;
-
-    const locationChangeHandler = (locationId: string) => {
-        const newActiveLoc = storageLocations.find(sl => sl.location_id === Number(locationId));
-        const containerId = String(newActiveLoc?.containers[0].storage_id) ?? null;
-        pushContainerUpdate(containerId, locationId);
-    }
-
-    // const pushState = () => {
-
-    // }
-
-    /*
-    useEffect(() => {
-        setStorageContainerVal(incomingValue?.toString() ?? '');
-    }, [incomingValue]);
-    */
+export function StorageLocationSelect({ storageContainerId, activeLocationObj, storageLocationsArr, pushContainerUpdate }: Props) {
 
     return (
         <>
@@ -61,11 +33,11 @@ export function StorageLocationSelect({ storageContainerVal, activeLocation, sto
                     Location
                 </ThemedText>
                 <Picker
-                    selectedValue={String(activeLocation?.location_id)}
-                    onValueChange={(locationId) => {locationChangeHandler(locationId)}}
+                    selectedValue={activeLocationObj?.location_id}
+                    onValueChange={(val) => { pushContainerUpdate(storageLocationsArr.find(l => l.location_id === Number(val))?.containers[0].storage_id.toString() ?? '', val.toString()) }}
                     style={styles.textInput}
                 >
-                    {storageLocations.map(l => 
+                    {storageLocationsArr.map(l => 
                         <Picker.Item label={l.location_name} value={l.location_id} key={l.location_id} />
                     )}
                 </Picker>
@@ -77,14 +49,13 @@ export function StorageLocationSelect({ storageContainerVal, activeLocation, sto
                     Container
                 </ThemedText>
 
-                {activeLocation && activeLocContainers ?
+                {activeLocationObj && activeLocationObj.containers ?
                     <Picker
-                        selectedValue={String(storageContainerVal)}
-                        // onValueChange={(contVal) => {setStorageContainerVal(contVal)}}
-                        onValueChange={(container) => {pushContainerUpdate(container)}}
+                        selectedValue={storageContainerId}
+                        onValueChange={(val) => { pushContainerUpdate(val) }}
                         style={styles.textInput}
                     >
-                        {activeLocContainers.map(c => 
+                        {activeLocationObj.containers.map(c => // map the active location's containers out here 
                             <Picker.Item label={c.container} value={c.storage_id} key={c.storage_id} />
                         )}
                     </Picker>
@@ -110,7 +81,7 @@ const styles = StyleSheet.create({
     },
     textInput: {
         flexGrow: 1,
-        textAlign: 'right',
+        // textAlign: 'right',
         backgroundColor: '#fafafa',
         paddingHorizontal: 8,
         paddingVertical: 8,

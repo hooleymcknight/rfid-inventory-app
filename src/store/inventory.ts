@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LocationObj, ContainerObj, ItemObj, DigitsCountObj, CategoriesObj, ItemSubmission, FullDataObj } from '@/constants/db-interface';
+import { LocationObj, ContainerObj, ItemObj, DigitsCountObj, CategoriesObj, ItemSubmission, FullDataObj, ItemUpdate } from '@/constants/db-interface';
 
 const API_BASE = "https://hollyngrade.com/rfid";
 
@@ -43,6 +43,56 @@ export const useAddToInventory = () => {
     return useMutation({
         mutationFn: async (itemData: ItemSubmission) => {
             const res = await fetch(API_BASE + '/api/inventory/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(itemData)
+            });
+            if (!res.ok) throw new Error (`HTTP ${res.status}`);
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: inventoryKeys.list() })
+        }
+    });
+}
+
+/** update inventory */
+
+export type InventoryUpdate = {
+    data: ItemUpdate;
+}
+
+export const useUpdateInventory = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (itemData: ItemUpdate) => {
+            const res = await fetch(API_BASE + '/api/inventory/updates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(itemData)
+            });
+            if (!res.ok) throw new Error (`HTTP ${res.status}`);
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: inventoryKeys.list() })
+        }
+    });
+}
+
+/** DELETEEEE */
+
+// export type InventoryDelete = {
+//     data: ItemDelete;
+// }
+
+export const useDeleteInventory = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (itemData: ItemUpdate) => {
+            const res = await fetch(API_BASE + `/api/inventory/items/${itemData.item_id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(itemData)
