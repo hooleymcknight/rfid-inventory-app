@@ -1,10 +1,12 @@
-import { StyleSheet, Pressable, PressableStateCallbackType, Text, Image } from 'react-native';
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+import { useState, useEffect } from 'react';
+import { StyleSheet, Pressable, PressableStateCallbackType, Text, Image, Alert, Platform } from 'react-native';
+
 import { Spacing } from '@/constants/theme';
 import type { ContainerObj, ItemObj, ItemUpdate, slSchema } from '@/constants/db-interface';
 import { toRFID, capitalizeWords, padInput, fixFieldType } from '@/constants/helpers';
-import { useState, useEffect } from 'react';
+
+import { ThemedText } from './themed-text';
+import { ThemedView } from './themed-view';
 import { ItemValueRow } from './item-value-row';
 import { StorageLocationSelect } from './storage-location-select';
 import BasicButton from './basic-button';
@@ -15,6 +17,7 @@ type Props = {
     storageLocations: { location_id: number; location_name: string; containers: ContainerObj[]; }[];
     onBack: () => void;
     updateInventory: any; // this is an object / class on which we call mutate
+    deleteItem: any // update this
 };
 
 const numberFields = ['id', 'location', 'container'];
@@ -25,7 +28,7 @@ const areIdentical = (original: ItemObj | null, active: ItemObj | null) => {
     for (const key of Object.keys(orig)) {
         const partA = (orig as Record<string, string | number | null>)[key];
         const partB = (curr as Record<string, string | number | null>)[key];
-        console.log('orig:', partA, 'new:', partB)
+        // console.log('orig:', partA, 'new:', partB)
         if (partA !== partB) {
             return false;
         }
@@ -33,7 +36,7 @@ const areIdentical = (original: ItemObj | null, active: ItemObj | null) => {
     return true;
 }
 
-export function BinDetail({ container, items, storageLocations, onBack, updateInventory }: Props) {
+export function BinDetail({ container, items, storageLocations, onBack, updateInventory, deleteItem }: Props) {
     const [isEditing, setIsEditing] = useState<boolean | number>(false);
     const [updateSuccess, setUpdateSuccess] = useState<boolean | null>(null);
     const [originalItemState, setOriginalItemState] = useState<ItemObj | null>(null);
@@ -92,8 +95,6 @@ export function BinDetail({ container, items, storageLocations, onBack, updateIn
                     storage_id: storageId || null,
                 }, {
                     onSuccess: () => {
-                        // setIsEditing(activeItem.item_id); // would this force a refresh? is it even needed if we are invalidating the query keys?
-                        console.log('edit success')
                         setUpdateSuccess(true);
                     },
                 });
@@ -113,25 +114,73 @@ export function BinDetail({ container, items, storageLocations, onBack, updateIn
             setUpdateSuccess(null);
         }
 
+        const deleteHandler = (id: number) => {
+            try {
+                deleteItem.mutate({
+                    item_id: id,
+                }, {
+                    onSuccess: () => {
+                        exitEditMode();
+                    },
+                })
+            }
+            catch (err) {
+                console.error(err);
+                setUpdateSuccess(false);
+            }
+        }
+
+        const fireDeleteAlert = () => {
+            if (!activeItem?.item_id) return;
+            
+            if (Platform.OS === 'web') {
+                const ok = window.confirm("Delete item? This cannot be undone! You'll have to make it again!");
+                if (ok) deleteHandler(activeItem.item_id);
+                return;
+            }
+            
+            Alert.alert('Delete item?', 'This cannot be undone! You\'ll have to make it again!',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Delete', style: 'destructive', onPress: () => {deleteHandler(activeItem?.item_id)}}
+                ]
+            )
+        }
+
         return (
             <ThemedView style={styles.header}>
                 <ThemedText type="subtitle" style={{ marginBottom: 40 }}>
                     {activeItem?.item}
                 </ThemedText>
-                <ThemedText type={updateSuccess ? 'success' : updateSuccess === false ? 'fail' : 'smallBold'}>{updateSuccess ? 'Edits saved!' : updateSuccess === false ? 'Edits failed. Please try again.' : String('\u00A0')}</ThemedText>
-                <ItemValueRow label="ID" incomingValue={activeItem?.item_id ?? null} onUpdate={(val) => { fieldChangeHandler('item_id', val) }} />
-                <ItemValueRow label="Name" incomingValue={activeItem?.item ?? null} onUpdate={(val) => { fieldChangeHandler('item', val) }} />
-                <ItemValueRow label="Description" incomingValue={activeItem?.description ?? null} onUpdate={(val) => { fieldChangeHandler('description', val) }} multiline={true} />
+                <ThemedText type={updateSuccess ? 'success' : updateSuccess === false ? 'fail' : 'smallBold'}>
+                    { updateSuccess ? 'Edits saved!' : updateSuccess === false ? 'Edits failed. Please try again.' : String('\u00A0') }
+                </ThemedText>
+
+                <ItemValueRow label="ID"
+                    incomingValue={activeItem?.item_id ?? null}
+                    onUpdate={(val) => { fieldChangeHandler('item_id', val) }}
+                />
+                <ItemValueRow label="Name"
+                    incomingValue={activeItem?.item ?? null}
+                    onUpdate={(val) => { fieldChangeHandler('item', val) }}
+                />
+                <ItemValueRow label="Description" multiline={true}
+                    incomingValue={activeItem?.description ?? null}
+                    onUpdate={(val) => { fieldChangeHandler('description', val) }}
+                />
                 
                 <StorageLocationSelect
                     storageContainerId={editingContainer ?? ''}
                     activeLocationObj={editingLocation}
                     storageLocationsArr={storageLocations}
-                    pushContainerUpdate={(storageId, locationId = null) => { setEditingContainer(storageId); if (locationId) setEditingLocation(storageLocations.find(l => l.location_id === Number(locationId)) ?? null) }} // these come back as strings
+                    pushContainerUpdate={(storageId, locationId = null) => {
+                        setEditingContainer(storageId);
+                        if (locationId) setEditingLocation(storageLocations.find(l => l.location_id === Number(locationId)) ?? null)
+                    }} // these come back as strings
                 />
 
                 <ThemedView style={styles.editButtons}>
-                    <BasicButton text="Delete" submitHandler={() => {}} />
+                    <BasicButton text="Delete" submitHandler={fireDeleteAlert} />
                     <BasicButton canSubmit={originalItemState !== null && !areIdentical(originalItemState, activeItem)} text="Submit" submitHandler={() => {editSubmitHandler(activeItem, editingContainer)}} />
                 </ThemedView>
 

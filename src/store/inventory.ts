@@ -44,7 +44,10 @@ export const useAddToInventory = () => {
         mutationFn: async (itemData: ItemSubmission) => {
             const res = await fetch(API_BASE + '/api/inventory/items', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': process.env.EXPO_PUBLIC_API_KEY ?? '',
+                },
                 body: JSON.stringify(itemData)
             });
             if (!res.ok) throw new Error (`HTTP ${res.status}`);
@@ -69,7 +72,10 @@ export const useUpdateInventory = () => {
         mutationFn: async (itemData: ItemUpdate) => {
             const res = await fetch(API_BASE + '/api/inventory/updates', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': process.env.EXPO_PUBLIC_API_KEY ?? '',
+                },
                 body: JSON.stringify(itemData)
             });
             if (!res.ok) throw new Error (`HTTP ${res.status}`);
@@ -83,9 +89,7 @@ export const useUpdateInventory = () => {
 
 /** DELETEEEE */
 
-// export type InventoryDelete = {
-//     data: ItemDelete;
-// }
+// this can piggyback off of the inventory update data type
 
 export const useDeleteInventory = () => {
     const queryClient = useQueryClient();
@@ -93,8 +97,11 @@ export const useDeleteInventory = () => {
     return useMutation({
         mutationFn: async (itemData: ItemUpdate) => {
             const res = await fetch(API_BASE + `/api/inventory/items/${itemData.item_id}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': process.env.EXPO_PUBLIC_API_KEY ?? '',
+                },
                 body: JSON.stringify(itemData)
             });
             if (!res.ok) throw new Error (`HTTP ${res.status}`);

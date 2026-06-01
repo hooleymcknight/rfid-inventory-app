@@ -8,7 +8,7 @@ import { ScreenContainer } from '@/components/screen-container';
 import { LocationAccordion } from '@/components/location-accordion';
 import { BinDetail } from '@/components/bin-detail';
 import { Spacing } from '@/constants/theme';
-import { useInventory, useUpdateInventory } from '@/store/inventory';
+import { useInventory, useUpdateInventory, useDeleteInventory } from '@/store/inventory';
 import { sortUnfixed } from '@/constants/helpers';
 
 export default function BrowseScreen() {
@@ -17,6 +17,7 @@ export default function BrowseScreen() {
 
     const [selectedStorageId, setSelectedStorageId] = useState<number | null>(defaultStorageBin);
     const updateInventory = useUpdateInventory();
+    const deleteInventory = useDeleteInventory();
     const { data, isLoading, isError } = useInventory();
 
     useFocusEffect(
@@ -64,6 +65,7 @@ export default function BrowseScreen() {
                     storageLocations={storageLocationsArr}
                     onBack={() => {setSelectedStorageId(null)}}
                     updateInventory={updateInventory}
+                    deleteItem={deleteInventory}
                 />
             </ScreenContainer>
         );
