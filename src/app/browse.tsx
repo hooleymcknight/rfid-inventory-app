@@ -57,6 +57,8 @@ export default function BrowseScreen() {
             });
         }
 
+        if (storageLocationsArr.length) console.log('we have length')
+
         return (
             <ScreenContainer style={{ paddingHorizontal: 8 }}>
                 <BinDetail

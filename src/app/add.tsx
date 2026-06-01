@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { StyleSheet, TextInput, View, Platform } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -11,6 +11,15 @@ import { parseRFID } from '@/constants/helpers';
 import AddedSuccess from '@/components/add-success';
 import BasicButton from '@/components/basic-button';
 
+const restoreValue = (el: HTMLInputElement, value: string) => {
+    const proto = el.tagName === 'TEXTAREA'
+        ? window.HTMLTextAreaElement.prototype
+        : window.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')!.set!;
+    setter.call(el, value);
+    el.dispatchEvent(new Event('input', { bubbles: true })); // RN Web → onChangeText
+}
+
 export default function AddScreen() {
     const [selectedStorageId, setSelectedStorageId] = useState<number | null>(null);
     const [inputName, setInputName] = useState<string>('');
@@ -18,23 +27,10 @@ export default function AddScreen() {
     const [scannedInput, setScannedInput] = useState<string>('');
     const [addSuccess, setAddSuccess] = useState<string | null>(null);
     const [containerTag, setContainerTag] = useState<string | null>(null);
-    
+
+    const rfidInputRef = useRef<HTMLInputElement | null>(null);
     const addInventory = useAddToInventory();
     const { data, isLoading, isError } = useInventory();
-
-    useFocusEffect(
-        useCallback(() => {
-            // stuff here runs when screen gains focus — optional
-
-            return () => {
-                setSelectedStorageId(null);
-                setInputName('');
-                setInputDesc('');
-                setScannedInput('');
-                setAddSuccess(null);
-            };
-        }, [])
-    );
 
     const isValidId = (input: string) => {
         if (!data) return false;
@@ -77,47 +73,79 @@ export default function AddScreen() {
         handleClear();
     }
 
-    useEffect(() => {
-        if (Platform.OS !== 'web') return;
-        let buffer = '';
-        let lastKeyTime = 0;
-        const SCAN_GAP_MS = 50; // keys faster than this = scanner
+    useFocusEffect(
+        useCallback(() => {
+            const reset = () => {
+                setSelectedStorageId(null);
+                setInputName('');
+                setInputDesc('');
+                setScannedInput('');
+                setAddSuccess(null);
+                setContainerTag(null);   // clears the sticky autoFocus
+            };
 
-        const onKeyDown = (e: KeyboardEvent) => {
-            const now = performance.now();
-            const gap = now - lastKeyTime;
-            lastKeyTime = now;
-
-            // Too slow → abandon any in-progress scan buffer
-            if (gap > SCAN_GAP_MS) buffer = '';
-
-            if (e.key === 'Enter' && /^\d{10}$/.test(buffer)) {
-                // setContainerTag(buffer);
-                setContainerTag('rfid');
-                setScannedInput(buffer);
-                buffer = '';
-                e.preventDefault(); // don't let Enter submit whatever input had focus
-            } else if (/^\d$/.test(e.key)) {
-                buffer += e.key;
+            if (Platform.OS !== 'web') {
+                return reset;
             }
-        };
 
-        window.addEventListener('keydown', onKeyDown, true); // capture phase
+            let buffer = '';
+            let lastKeyTime = 0;
+            let scanSnapshot: { el: HTMLInputElement; value: string } | null = null;
+            const SCAN_GAP_MS = 50;
 
-        // back button handler
-        // const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-        //     if (selectedStorageId !== null) {
-        //         setSelectedStorageId(null);
-        //         return true;
-        //     }
-        //     return false;
-        // });
+            const onKeyDown = (e: KeyboardEvent) => {
+                const now = performance.now();
+                const gap = now - lastKeyTime;
+                lastKeyTime = now;
 
-        return () => {
-            window.removeEventListener('keydown', onKeyDown, true);
-            // sub.remove();
-        }
-    }, []);
+                if (gap > SCAN_GAP_MS) {
+                    buffer = '';
+                    scanSnapshot = null;
+                }
+
+                if (e.key === 'Enter') {
+                    if (/^\d{10}$/.test(buffer)) {
+                        setContainerTag('rfid');
+                        setScannedInput(buffer);
+                        // undo the stray first digit that leaked into the focused field,
+                        // unless that field was the RFID input itself (we overwrite it anyway)
+                        if (scanSnapshot && scanSnapshot.el !== rfidInputRef.current) {
+                            restoreValue(scanSnapshot.el, scanSnapshot.value);
+                        }
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    buffer = '';
+                    scanSnapshot = null;
+                    return;
+                }
+
+                if (/^\d$/.test(e.key)) {
+                    if (gap <= SCAN_GAP_MS) {
+                        // burst digits 2–10 → swallow before they reach any field
+                        e.preventDefault();
+                        e.stopPropagation();
+                    } else {
+                        // buffer was just cleared above → this is the first digit.
+                        // can't yet know if it's a scan, so let it through but snapshot
+                        // the field's clean value (insertion hasn't happened yet)
+                        const el = document.activeElement as HTMLInputElement | null;
+                        if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+                            scanSnapshot = { el, value: el.value };
+                        }
+                    }
+                    buffer += e.key;
+                }
+            };
+
+            window.addEventListener('keydown', onKeyDown, true); // capture phase
+
+            return () => {
+                window.removeEventListener('keydown', onKeyDown, true);
+                reset();
+            };
+        }, [])
+    );
 
     if (isLoading) return <ScreenContainer><ThemedText>Loading…</ThemedText></ScreenContainer>;
     if (isError || !data) return <ScreenContainer><ThemedText>Error. Please close and reopen the app.</ThemedText></ScreenContainer>;
@@ -167,6 +195,7 @@ export default function AddScreen() {
                     />
 
                     <TextInput
+                        ref={rfidInputRef as any}
                         style={[styles.input]}
                         placeholderTextColor="rgba(0, 0, 0, 0.6)"
                         keyboardType="numeric"

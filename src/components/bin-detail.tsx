@@ -14,10 +14,10 @@ import BasicButton from './basic-button';
 type Props = {
     container: ContainerObj | undefined;
     items: ItemObj[];
-    storageLocations: { location_id: number; location_name: string; containers: ContainerObj[]; }[];
+    storageLocations?: { location_id: number; location_name: string; containers: ContainerObj[]; }[];
     onBack: () => void;
-    updateInventory: any; // this is an object / class on which we call mutate
-    deleteItem: any // update this
+    updateInventory?: any; // this is an object / class on which we call mutate
+    deleteItem?: any // update this
 };
 
 const numberFields = ['id', 'location', 'container'];
@@ -28,7 +28,7 @@ const areIdentical = (original: ItemObj | null, active: ItemObj | null) => {
     for (const key of Object.keys(orig)) {
         const partA = (orig as Record<string, string | number | null>)[key];
         const partB = (curr as Record<string, string | number | null>)[key];
-        // console.log('orig:', partA, 'new:', partB)
+        // console.log('orig:', partA, 'new:', partB);
         if (partA !== partB) {
             return false;
         }
@@ -42,20 +42,20 @@ export function BinDetail({ container, items, storageLocations, onBack, updateIn
     const [originalItemState, setOriginalItemState] = useState<ItemObj | null>(null);
 
     const getActiveItem = () => { return items.find(i => i.item_id === isEditing) ?? null }
-    const [editingLocation, setEditingLocation] = useState<slSchema | null>(storageLocations.find(l => l.containers.filter(c => c.storage_id === getActiveItem()?.storage_id)[0]) ?? null);
+    const [editingLocation, setEditingLocation] = useState<slSchema | null>(storageLocations?.find(l => l.containers.filter(c => c.storage_id === getActiveItem()?.storage_id)[0]) ?? null);
     const [editingContainer, setEditingContainer] = useState<string | null>(String(getActiveItem()?.storage_id));
     const [activeItem, setActiveItem] = useState<ItemObj | null>(getActiveItem());
 
     useEffect(() => {
         const startingActiveItem = activeItem ?? getActiveItem() ?? null;
         if (!startingActiveItem) return;
-        setEditingLocation(storageLocations.find(l => l.containers.filter(c => c.storage_id === startingActiveItem.storage_id)[0]) ?? null);
+        setEditingLocation(storageLocations?.find(l => l.containers.filter(c => c.storage_id === startingActiveItem.storage_id)[0]) ?? null);
         setEditingContainer(String(startingActiveItem.storage_id));
         setActiveItem(startingActiveItem);
         if (originalItemState === null) setOriginalItemState(startingActiveItem);
     }, [isEditing, activeItem]);
 
-    if (isEditing) {
+    if (isEditing && !!storageLocations) {
 
         const fieldChangeHandler = (fieldName: string, fieldVal: string | number | null) => {
             const base = activeItem ?? getActiveItem();
