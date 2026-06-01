@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
         cursor: 'not-allowed',
     },
     arrowBtn: {
-        marginBottom: 5,
-        marginTop: -6,
+        // marginBottom: 5,
+        // marginTop: -6,
     }
 });

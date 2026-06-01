@@ -154,6 +154,6 @@ const styles = StyleSheet.create({
         marginHorizontal: 'auto',
         marginBottom: 24,
         maxWidth: '95%',
-        flexWrap: 'wrap',
+        flexWrap: Platform.OS === 'web' ? 'wrap' : 'nowrap',
     },
 });
