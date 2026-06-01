@@ -19,7 +19,13 @@ export type InventorySync = {
 };
 
 async function fetchInventory(): Promise<InventorySync> {
-    const res = await fetch(API_BASE + '/api/inventory/sync');
+    const res = await fetch(API_BASE + '/api/inventory/sync', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.EXPO_PUBLIC_API_KEY ?? '',
+        },
+    });
     if (!res.ok) throw new Error('Failed to fetch inventory');
     return res.json();
 }
