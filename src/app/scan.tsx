@@ -142,7 +142,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(0, 0, 0, 0.4)',
         color: '#000',
-        // height: 40,
         flexShrink: 1
     },
     inputBtnContainer: {

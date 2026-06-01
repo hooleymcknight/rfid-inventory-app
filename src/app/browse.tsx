@@ -8,7 +8,7 @@ import { ScreenContainer } from '@/components/screen-container';
 import { LocationAccordion } from '@/components/location-accordion';
 import { BinDetail } from '@/components/bin-detail';
 import { Spacing } from '@/constants/theme';
-import { useInventory } from '@/store/inventory';
+import { useInventory, useUpdateInventory, useDeleteInventory } from '@/store/inventory';
 import { sortUnfixed } from '@/constants/helpers';
 
 export default function BrowseScreen() {
@@ -16,6 +16,8 @@ export default function BrowseScreen() {
     const defaultStorageBin = defaultBin ? Number(defaultBin) : null;
 
     const [selectedStorageId, setSelectedStorageId] = useState<number | null>(defaultStorageBin);
+    const updateInventory = useUpdateInventory();
+    const deleteInventory = useDeleteInventory();
     const { data, isLoading, isError } = useInventory();
 
     useFocusEffect(
@@ -45,12 +47,25 @@ export default function BrowseScreen() {
         const container = data.containers.find((c) => c.storage_id === selectedStorageId);
         const items = data.items.filter((i) => i.storage_id === selectedStorageId);
 
+        const storageLocationsArr = [];
+        for (const loc of data.locations) {
+            const theseContainers = data.containers.filter(c => c.location_id === loc.location_id) // data.containers[0].location_id
+            storageLocationsArr.push({
+                location_id: loc.location_id,
+                location_name: loc.location_name,
+                containers: theseContainers, // containerObj[]
+            });
+        }
+
         return (
             <ScreenContainer style={{ paddingHorizontal: 8 }}>
                 <BinDetail
                     container={container}
                     items={items}
+                    storageLocations={storageLocationsArr}
                     onBack={() => {setSelectedStorageId(null)}}
+                    updateInventory={updateInventory}
+                    deleteItem={deleteInventory}
                 />
             </ScreenContainer>
         );

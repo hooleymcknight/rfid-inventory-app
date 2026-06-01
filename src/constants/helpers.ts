@@ -80,3 +80,18 @@ export const capitalizeWords = (str: string) => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each
     .join(' ');    // Join them back into a single string
 }
+
+export const fixFieldType = (input: string | number | null, outputType: string) => {
+    // check if number first.
+    const inputAsNumber = Number(input);
+    if (outputType === 'number' && typeof(inputAsNumber) === 'number' && !Number.isNaN(inputAsNumber)) {
+        return inputAsNumber;
+    }
+
+    if (typeof(input) === 'string') {
+        // return input.length ? input : null;
+        return input;
+    }
+
+    return null;
+}
