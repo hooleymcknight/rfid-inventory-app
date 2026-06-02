@@ -39,7 +39,11 @@ export default function SearchScreen() {
     if (isError || !data) return <ScreenContainer><ThemedText>Error. Please close and reopen the app.</ThemedText></ScreenContainer>;
 
     const fuse = useMemo(
-        () => new Fuse(data.items, { keys: ['item', 'description'] }),
+        () => new Fuse(data.items, {
+            keys: ['item', 'description'],
+            threshold: 0.4,
+            ignoreLocation: true,
+        }),
         [data.items]
     );
 
@@ -89,7 +93,7 @@ export default function SearchScreen() {
                             const location = data.locations.find(z => z.location_id === container.location_id) ??
                                 { location_name: "unknown" };
                             return (
-                                <View key={x.item_id} style={{ marginBottom: 8 }}>
+                                <View key={x.item_id} style={{ marginBottom: 16 }}>
                                     <ThemedText type="largeBold">{x.item}</ThemedText>
                                     {x.description ? <ThemedText>{x.description}</ThemedText> : null}
                                     <ThemedText>Location:  {location.location_name}</ThemedText>
