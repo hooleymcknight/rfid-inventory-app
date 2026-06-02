@@ -80,7 +80,7 @@ export default function SearchScreen() {
                 </View>
 
                 { searchResults.length > 0 ?
-                    <View>
+                    <View style={{ paddingHorizontal: Spacing.four }}>
                         {searchResults.map(x => {
                             // this is "an" handler if one of these doesn't exist... it'll render the search result 
                             // and we'll just be confused about where it is.
@@ -88,12 +88,14 @@ export default function SearchScreen() {
                                 { container: "unknown", location_id: null };
                             const location = data.locations.find(z => z.location_id === container.location_id) ??
                                 { location_name: "unknown" };
-                            return (<View key={x.item_id}>
-                                <ThemedText type="largeBold">{x.item}</ThemedText>
-                                {x.description ? <ThemedText>{x.description}</ThemedText> : null}
-                                <ThemedText>Location:  {location.location_name}</ThemedText>
-                                <ThemedText>Container:  {container.container}</ThemedText>
-                            </View>);
+                            return (
+                                <View key={x.item_id} style={{ marginBottom: 8 }}>
+                                    <ThemedText type="largeBold">{x.item}</ThemedText>
+                                    {x.description ? <ThemedText>{x.description}</ThemedText> : null}
+                                    <ThemedText>Location:  {location.location_name}</ThemedText>
+                                    <ThemedText>Container:  {container.container}</ThemedText>
+                                </View>
+                            );
                         })}
                     </View>
                 : noResults ? // pretty sure having no results is different than not having search results
