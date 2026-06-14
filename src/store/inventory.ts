@@ -77,7 +77,7 @@ export const useUpdateInventory = () => {
     return useMutation({
         mutationFn: async (itemData: ItemUpdate) => {
             const res = await fetch(API_BASE + '/api/inventory/updates', {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-api-key': process.env.EXPO_PUBLIC_API_KEY ?? '',
