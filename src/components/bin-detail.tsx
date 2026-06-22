@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, Pressable, PressableStateCallbackType, Text, Image, Alert, Platform } from 'react-native';
+import { StyleSheet, Pressable, PressableStateCallbackType, Text, Image, Alert, Platform, DimensionValue } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import type { ContainerObj, ItemObj, ItemUpdate, slSchema } from '@/constants/db-interface';
@@ -10,6 +10,7 @@ import { ThemedView } from './themed-view';
 import { ItemValueRow } from './item-value-row';
 import { StorageLocationSelect } from './storage-location-select';
 import BasicButton from './basic-button';
+import { useRouter } from 'expo-router';
 
 type Props = {
     container: ContainerObj | undefined;
@@ -20,7 +21,7 @@ type Props = {
     deleteItem?: any // update this
 };
 
-const numberFields = ['id', 'location', 'container'];
+const numberFields = ['id', 'location', 'container', 'storage_id', 'location_id'];
 
 const areIdentical = (original: ItemObj | null, active: ItemObj | null) => {
     const orig = {...original};
@@ -28,7 +29,6 @@ const areIdentical = (original: ItemObj | null, active: ItemObj | null) => {
     for (const key of Object.keys(orig)) {
         const partA = (orig as Record<string, string | number | null>)[key];
         const partB = (curr as Record<string, string | number | null>)[key];
-        // console.log('orig:', partA, 'new:', partB);
         if (partA !== partB) {
             return false;
         }
@@ -37,6 +37,8 @@ const areIdentical = (original: ItemObj | null, active: ItemObj | null) => {
 }
 
 export function BinDetail({ container, items, storageLocations, onBack, updateInventory, deleteItem }: Props) {
+    const router = useRouter();
+
     const [isEditing, setIsEditing] = useState<boolean | number>(false);
     const [updateSuccess, setUpdateSuccess] = useState<boolean | null>(null);
     const [originalItemState, setOriginalItemState] = useState<ItemObj | null>(null);
@@ -49,7 +51,9 @@ export function BinDetail({ container, items, storageLocations, onBack, updateIn
     useEffect(() => {
         const startingActiveItem = activeItem ?? getActiveItem() ?? null;
         if (!startingActiveItem) return;
-        setEditingLocation(storageLocations?.find(l => l.containers.filter(c => c.storage_id === startingActiveItem.storage_id)[0]) ?? null);
+        
+        const newEditingLocation = storageLocations?.find(l => l.containers.filter(c => c.storage_id === startingActiveItem.storage_id)[0]) ?? null;
+        setEditingLocation(newEditingLocation);
         setEditingContainer(String(startingActiveItem.storage_id));
         setActiveItem(startingActiveItem);
         if (originalItemState === null) setOriginalItemState(startingActiveItem);
@@ -64,7 +68,6 @@ export function BinDetail({ container, items, storageLocations, onBack, updateIn
             let outputType = numberFields.includes(fieldName.toLowerCase()) ? 'number' : 'string';
 
             let newFieldValue = fixFieldType(fieldVal, outputType);
-            
             const updatedItem = {...base};
             if (fieldName.toLowerCase() !== 'description' && newFieldValue === null) {
                 newFieldValue = '';
@@ -175,7 +178,8 @@ export function BinDetail({ container, items, storageLocations, onBack, updateIn
                     storageLocationsArr={storageLocations}
                     pushContainerUpdate={(storageId, locationId = null) => {
                         setEditingContainer(storageId);
-                        if (locationId) setEditingLocation(storageLocations.find(l => l.location_id === Number(locationId)) ?? null)
+                        if (locationId) setEditingLocation(storageLocations.find(l => l.location_id === Number(locationId)) ?? null);
+                        fieldChangeHandler('storage_id', storageId);
                     }} // these come back as strings
                 />
 
@@ -214,7 +218,15 @@ export function BinDetail({ container, items, storageLocations, onBack, updateIn
                 : <ThemedText type="subtitle">Bin</ThemedText>}
             </ThemedView>
 
-            <ThemedView>
+            <ThemedView style={{
+                maxWidth: 500,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                width: '100%',
+                maxHeight: 'calc(100vh - 174px)' as DimensionValue,
+                overflowY: 'scroll',
+                paddingBottom: 96,
+            }}>
                 {items.length === 0 ? (
                     <ThemedText themeColor="textSecondary" style={[styles.centerText, { marginBottom: 5 }]}>
                         There are no items in this container.
@@ -243,16 +255,38 @@ export function BinDetail({ container, items, storageLocations, onBack, updateIn
                     </ThemedView>
                 )}
 
-                <Pressable
-                    style={({ hovered, pressed }: PressableStateCallbackType) => [
-                        styles.btn,
-                        hovered && styles.btnHovered,
-                        pressed && styles.btnPressed,
-                    ]}
-                    onPress={onBack}
-                >
-                    <Text style={styles.btnText}>Go back</Text>
-                </Pressable>
+                <ThemedView style={[ styles.editButtons, styles.floatingBtnContainer ]}>
+                    { container && container != null ?
+                        <Pressable
+                            style={({ hovered, pressed }: PressableStateCallbackType) => [
+                                styles.btn, styles.floatingBtn,
+                                hovered && styles.btnHovered,
+                                pressed && styles.btnPressed,
+                            ]}
+                            onPress={() => {
+                                const thisRfid = toRFID(container.location_id, container?.category_id, container?.storage_id).toString();
+                                router.push({
+                                    pathname: '/add',
+                                    params: { toBin: thisRfid }
+                                });
+                            }}
+                        >
+                            <Text style={styles.btnText}>Add to this bin</Text>
+                        </Pressable>
+                    : null }
+
+                    <Pressable
+                        style={({ hovered, pressed }: PressableStateCallbackType) => [
+                            styles.btn, styles.floatingBtn,
+                            hovered && styles.btnHovered,
+                            pressed && styles.btnPressed,
+                        ]}
+                        onPress={onBack}
+                    >
+                        <Text style={styles.btnText}>Go back</Text>
+                    </Pressable>
+                </ThemedView>
+                
             </ThemedView>
         </>
     );
@@ -308,5 +342,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         width: '90%',
         alignItems: 'center',
+    },
+    floatingBtn: {
+        boxShadow: '1px 1px 6px 2px rgba(0, 0, 0, 0.4)'
+    },
+    floatingBtnContainer: {
+        position: 'fixed',
+        bottom: 32,
+        maxWidth: 500,
+        justifyContent: 'space-between',
     }
 });

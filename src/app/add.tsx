@@ -3,7 +3,7 @@ import { StyleSheet, TextInput, View, Platform } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ScreenContainer } from '@/components/screen-container';
-import { useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import { Spacing } from '@/constants/theme';
 import { useInventory, useAddToInventory } from '@/store/inventory';
@@ -28,6 +28,10 @@ export default function AddScreen() {
     const [addSuccess, setAddSuccess] = useState<string | null>(null);
     const [containerTag, setContainerTag] = useState<string | null>(null);
 
+    const { toBin } = useLocalSearchParams<{ toBin?: string }>();
+    const preselectedStorageBin = toBin ?? null;
+    
+    const preselectedRef = useRef<string | null>(null);
     const rfidInputRef = useRef<HTMLInputElement | null>(null);
     const addInventory = useAddToInventory();
     const { data, isLoading, isError } = useInventory();
@@ -38,9 +42,11 @@ export default function AddScreen() {
         return data.containers.some(c => c.storage_id === match?.storage_id);
     }
 
-    const canSubmit = inputName.trim().length > 0 && isValidId(scannedInput);
+    const canSubmit = inputName.trim().length > 0 && isValidId(scannedInput) && inputName.trim() !== scannedInput;
 
-    const handleClear = () => setScannedInput('');
+    const handleClear = () => {
+        setScannedInput('');
+    };
 
     const handleScanChange = (val: string) => {
         const digitsOnly = val.replace(/\D/g, '');
@@ -79,7 +85,6 @@ export default function AddScreen() {
                 setSelectedStorageId(null);
                 setInputName('');
                 setInputDesc('');
-                setScannedInput('');
                 setAddSuccess(null);
                 setContainerTag(null);   // clears the sticky autoFocus
             };
@@ -138,13 +143,26 @@ export default function AddScreen() {
                 }
             };
 
-            window.addEventListener('keydown', onKeyDown, true); // capture phase
+            window.addEventListener('keydown', onKeyDown, true); // capture phase            
 
             return () => {
                 window.removeEventListener('keydown', onKeyDown, true);
                 reset();
             };
         }, [])
+    );
+
+    useFocusEffect(
+        useCallback(() => {
+            if (preselectedStorageBin && preselectedRef.current !== preselectedStorageBin) {
+                setScannedInput(preselectedStorageBin);
+                preselectedRef.current = preselectedStorageBin;
+            }
+
+            return () => {
+                setScannedInput(''); // only reset this when you lose focus entirely.
+            };
+        }, [preselectedStorageBin])
     );
 
     if (isLoading) return <ScreenContainer><ThemedText>Loading…</ThemedText></ScreenContainer>;

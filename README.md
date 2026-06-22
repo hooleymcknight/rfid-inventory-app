@@ -8,14 +8,16 @@ This app was built for my own home, and the database was structured with that in
 ### Recent updates
 
 - edit submit actually submits
+- fixed the "see bin" not showing the bin contents until refresh
+- transfer container functionality (dropdown in edit item)
+- fixed bug: default container in dropdown for edit item is not correct
 
 ### Future goals
 
-- fix the "see bin" not showing the bin contents until refresh
 - build test database for friend's usage
-- transfer container functionality (the dropdown is already there)
 - rename/add/remove containers
-- default container in dropdown for edit item is not correct
+
+- text wrap on bin details (to avoid horizontal scroll)
 - ask if possible duplicate (should be stricter fuzzy match than the search)
 - search relevance scores
 - search looking at description as well as name
