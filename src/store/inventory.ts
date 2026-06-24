@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LocationObj, ContainerObj, ItemObj, DigitsCountObj, CategoriesObj, ItemSubmission, FullDataObj, ItemUpdate } from '@/constants/db-interface';
 
-const API_BASE = "https://hollyngrade.com/rfid";
+const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 
 export const inventoryKeys = {
     all: ['inventory'] as const,
@@ -19,7 +19,7 @@ export type InventorySync = {
 };
 
 async function fetchInventory(): Promise<InventorySync> {
-    const res = await fetch(API_BASE + '/api/inventory/sync', {
+    const res = await fetch(API_BASE + 'api/inventory/sync', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export const useAddToInventory = () => {
 
     return useMutation({
         mutationFn: async (itemData: ItemSubmission) => {
-            const res = await fetch(API_BASE + '/api/inventory/items', {
+            const res = await fetch(API_BASE + 'api/inventory/items', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export const useUpdateInventory = () => {
 
     return useMutation({
         mutationFn: async (itemData: ItemUpdate) => {
-            const res = await fetch(API_BASE + '/api/inventory/updates', {
+            const res = await fetch(API_BASE + 'api/inventory/updates', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export const useDeleteInventory = () => {
 
     return useMutation({
         mutationFn: async (itemData: ItemUpdate) => {
-            const res = await fetch(API_BASE + `/api/inventory/items/${itemData.item_id}`, {
+            const res = await fetch(API_BASE + `api/inventory/items/${itemData.item_id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
